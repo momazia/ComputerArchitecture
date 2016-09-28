@@ -1,5 +1,8 @@
 package com.booth.utilities;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.math.BigInteger;
 
 public class BoothUtils {
@@ -17,6 +20,16 @@ public class BoothUtils {
 			instance = new BoothUtils();
 		}
 		return instance;
+	}
+
+	public void driver() throws IOException {
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		System.out.println("Enter number 1 (binary): ");
+		String firstNum = br.readLine();
+		System.out.println("Enter number 2 (binary): ");
+		String secondNum = br.readLine();
+		int product = boothMultiplier((short) Integer.parseInt(firstNum, 2), (short) Integer.parseInt(secondNum, 2));
+		System.out.println("Result: " + Integer.toBinaryString(product));
 	}
 
 	public Result ALU1Bit(final short firstBit, final short secondBit, final int operation, final int carryIn) {
