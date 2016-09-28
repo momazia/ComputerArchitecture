@@ -151,8 +151,18 @@ public class TestBoothUtils {
 	}
 
 	@Test
-	public void testBoothMultiplier() {
+	public void testBoothMultiplier1() {
 		assertEquals(6, instance.boothMultiplier((short) 2, (short) 3));
+	}
+
+	@Test
+	public void testBoothMultiplier2() {
+		assertEquals(-99, instance.boothMultiplier((short) 0x0009, (short) 0xFFF5));
+	}
+
+	@Test
+	public void testBoothMultiplier3() {
+		assertEquals(-99, instance.boothMultiplier((short) 0xFFF5, (short) 0x0009));
 	}
 
 }

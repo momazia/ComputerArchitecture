@@ -1,5 +1,7 @@
 package com.booth.utilities;
 
+import java.math.BigInteger;
+
 public class BoothUtils {
 
 	private static final short MAX_BIT = 16;
@@ -66,12 +68,18 @@ public class BoothUtils {
 			short ac_0 = getBitAt(ac, 0);
 			ac = (short) (ac >> 1);
 			mq = (short) (mq >> 1);
-			mq += ac_0 * (short) 0x8000; // Moving the 0 bit to first of MQ.
+			if (ac_0 == 1) {
+				mq = (short) (mq | (short) 0x8000); // Changing the sign bit to
+													// one.
+			} else {
+				mq = (short) (mq & (short) 0x7FFF); // Changing the sign bit to
+													// zero.
+			}
 			dj = dj1;
 			prshortLine(ac, cycleCounter, md, mq, dj);
 			cycleCounter--;
 		}
-		return 0xFFFF0000 ^ ac + 0x0000FFFF ^ mq;
+		return new BigInteger(Integer.toBinaryString(0xFFFF & ac) + Integer.toBinaryString(0xFFFF & mq), 2).intValue();
 	}
 
 	private void prshortLine(short ac, short cycleCounter, short md, short mq, short dj1) {
