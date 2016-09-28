@@ -2,10 +2,10 @@ package com.booth.utilities;
 
 public class Result {
 
-	private int value;
-	private int carryOut;
+	private short value;
+	private short carryOut;
 
-	public Result(int value, int carryOut) {
+	public Result(short value, short carryOut) {
 		super();
 		this.value = value;
 		this.carryOut = carryOut;
@@ -14,19 +14,19 @@ public class Result {
 	public Result() {
 	}
 
-	public int getValue() {
+	public short getValue() {
 		return value;
 	}
 
-	public void setValue(int value) {
+	public void setValue(short value) {
 		this.value = value;
 	}
 
-	public int getCarryOut() {
+	public short getCarryOut() {
 		return carryOut;
 	}
 
-	public void setCarryOut(int carryOut) {
+	public void setCarryOut(short carryOut) {
 		this.carryOut = carryOut;
 	}
 

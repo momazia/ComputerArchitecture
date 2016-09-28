@@ -2,8 +2,9 @@ package com.booth.utilities;
 
 public class BoothUtils {
 
-	private static final int ASCII_INTEGER_INDEX = 48;
-	private static final int ONE_BIT_MASK = 1;
+	private static final short MAX_BIT = 16;
+	private static final short ASCII_shortEGER_INDEX = 48;
+	private static final short ONE_BIT_MASK = 1;
 	private static BoothUtils instance;
 
 	private BoothUtils() {
@@ -16,35 +17,77 @@ public class BoothUtils {
 		return instance;
 	}
 
-	public Result ALU1Bit(final int firstBit, final int secondBit, final int operation, final int carryIn) {
-		int newSecondBit = secondBit;
+	public Result ALU1Bit(final short firstBit, final short secondBit, final int operation, final int carryIn) {
+		short newSecondBit = secondBit;
 		if (operation == 1) {
 			newSecondBit = negate(secondBit);
 		}
 		Result result = new Result();
-		result.setValue(firstBit ^ newSecondBit ^ carryIn);
-		result.setCarryOut((firstBit & newSecondBit) + (carryIn & (firstBit ^ newSecondBit)));
+		result.setValue((short) (firstBit ^ newSecondBit ^ carryIn));
+		result.setCarryOut((short) ((firstBit & newSecondBit) + (carryIn & (firstBit ^ newSecondBit))));
 		return result;
 	}
 
-	public int ALU16Bit(final int value1, final int value2, final int operation) {
+	public short ALU16Bit(final short value1, final short value2, final int operation) {
 		int carryIn = operation;
-		char[] finalResult = new char[16];
-		for (int i = 0; i < 16; i++) {
-			int value1Bit = getBitAt(value1, i);
-			int value2Bit = getBitAt(value2, i);
+		char[] finalResult = new char[MAX_BIT];
+		for (short i = 0; i < MAX_BIT; i++) {
+			short value1Bit = getBitAt(value1, i);
+			short value2Bit = getBitAt(value2, i);
 			Result result = ALU1Bit(value1Bit, value2Bit, operation, carryIn);
 			carryIn = result.getCarryOut();
-			finalResult[16 - i - 1] = (char) (result.getValue() + ASCII_INTEGER_INDEX);
+			finalResult[MAX_BIT - i - 1] = (char) (result.getValue() + ASCII_shortEGER_INDEX);
 		}
-		int finalResultInt = Integer.parseInt(new String(finalResult), 2);
-		if (overFlow(value1, value2, finalResultInt, operation)) {
+		short finalResultshort = (short) Integer.parseInt(new String(finalResult), 2);
+		if (overFlow(value1, value2, finalResultshort, operation)) {
 			throw new IllegalArgumentException("Bad input entry, overflow happened!");
 		}
-		return finalResultInt;
+		return finalResultshort;
 	}
 
-	public int sign(int i) {
+	public int boothMultiplier(short multiplier, short multiplicand) {
+		short ac = 0, cycleCounter = MAX_BIT;
+		short md = multiplicand;
+		short mq = multiplier;
+		short dj = 0;
+		System.out.println("Cycle-counter\tMD\t\t\t\tAC\t\t\t\tMQ\t\t\tMQ_1");
+		while (cycleCounter > 0) {
+			short dj1 = getBitAt(mq, 0);
+			prshortLine(ac, cycleCounter, md, mq, dj);
+			if (dj == 1 && dj1 == 0) {
+				// Addition
+				ac = ALU16Bit(ac, md, (short) 0); // 0 means add
+				prshortLine(ac, cycleCounter, md, mq, dj);
+			} else if (dj == 0 && dj1 == 1) {
+				// Subtraction
+				ac = ALU16Bit(ac, md, (short) 1); // 1 means sub
+				prshortLine(ac, cycleCounter, md, mq, dj);
+			}
+			short ac_0 = getBitAt(ac, 0);
+			ac = (short) (ac >> 1);
+			mq = (short) (mq >> 1);
+			mq += ac_0 * (short) 0x8000; // Moving the 0 bit to first of MQ.
+			dj = dj1;
+			prshortLine(ac, cycleCounter, md, mq, dj);
+			cycleCounter--;
+		}
+		return 0xFFFF0000 ^ ac + 0x0000FFFF ^ mq;
+	}
+
+	private void prshortLine(short ac, short cycleCounter, short md, short mq, short dj1) {
+		String output = format(cycleCounter, 5);
+		output += "\t\t" + format(md, 16);
+		output += "\t\t" + format(ac, 16);
+		output += "\t\t" + format(mq, 16);
+		output += "\t" + dj1;
+		System.out.println(output);
+	}
+
+	private String format(short value, int bits) {
+		return String.format("%" + bits + "s", Integer.toBinaryString(0xFFFF & value)).replace(' ', '0');
+	}
+
+	public short sign(final short i) {
 		if (i == 0)
 			return 0;
 		if (i >> 15 != 0)
@@ -52,10 +95,10 @@ public class BoothUtils {
 		return +1;
 	}
 
-	public boolean overFlow(final int value1, final int value2, final int result, final int operation) {
-		int value1Sign = sign(value1);
-		int value2Sign = sign(value2);
-		int resultSign = sign(result);
+	public boolean overFlow(final short value1, final short value2, final short result, final int operation) {
+		short value1Sign = sign(value1);
+		short value2Sign = sign(value2);
+		short resultSign = sign(result);
 		if (operation == 0) {
 			return (value1Sign > 0 && value2Sign > 0 && resultSign < 0)
 					|| (value1Sign < 0 && value2Sign < 0 && resultSign > 0);
@@ -64,12 +107,12 @@ public class BoothUtils {
 				|| (value1Sign < 0 && value2Sign > 0 && resultSign > 0);
 	}
 
-	public int getBitAt(int value, int index) {
-		return value >> index & ONE_BIT_MASK;
+	public short getBitAt(final short value, final int index) {
+		return (short) (value >> index & ONE_BIT_MASK);
 	}
 
-	public int negate(int value) {
-		return ~value & ONE_BIT_MASK;
+	public short negate(final short value) {
+		return (short) (~value & ONE_BIT_MASK);
 	}
 
 }
