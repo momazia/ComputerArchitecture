@@ -4,8 +4,7 @@ public class Instruction {
 
 	private String node;
 	private String cpu;
-	private String instruction;
-	private InstructionType type;
+	private IInstruction instruction;
 
 	public Instruction() {
 	}
@@ -14,8 +13,17 @@ public class Instruction {
 		super();
 		this.node = node;
 		this.cpu = cpu;
-		this.instruction = instruction;
-		this.type = InstructionType.findValueOf(instruction);
+		this.instruction = instuctionFactory(instruction);
+	}
+
+	private IInstruction instuctionFactory(String instruction) {
+		switch (InstructionType.findValueOf(instruction)) {
+		case LOAD:
+			return new LoadInstruction(instruction);
+		case STORE:
+			return new StoreInstruction(instruction);
+		}
+		return null;
 	}
 
 	public String getNode() {
@@ -34,19 +42,12 @@ public class Instruction {
 		this.cpu = cpu;
 	}
 
-	public String getInstruction() {
+	public IInstruction getInstruction() {
 		return instruction;
 	}
 
-	public void setInstruction(String instruction) {
+	public void setInstruction(IInstruction instruction) {
 		this.instruction = instruction;
 	}
 
-	public InstructionType getType() {
-		return type;
-	}
-
-	public void setType(InstructionType type) {
-		this.type = type;
-	}
 }
