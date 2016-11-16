@@ -11,12 +11,21 @@ import com.ccnuma.pojo.Instruction;
 public class FileUtils {
 
 	private static final String IO_PATH = "../cc-NUMA/io/";
-	private static FileUtils instance = null;
 
+	/**
+	 * static Singleton instance
+	 */
+	private static FileUtils instance;
+
+	/**
+	 * Private constructor for singleton
+	 */
 	private FileUtils() {
-		super();
 	}
 
+	/**
+	 * Static getter method for retrieving the singleton instance
+	 */
 	public static FileUtils getInstance() {
 		if (instance == null) {
 			instance = new FileUtils();
@@ -32,4 +41,5 @@ public class FileUtils {
 		}
 		return instructions;
 	}
+
 }
