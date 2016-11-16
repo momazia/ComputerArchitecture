@@ -55,7 +55,7 @@ public class SystemSimulatorUtils {
 	private Node initializeNode(int nodeNumber) {
 		Node node = new Node();
 		node.setCpus(initializeCPUs());
-		node.setDirectoryEntries(initializeDirectoryEntries());
+		node.setDirectoryEntries(initializeDirectoryEntries(nodeNumber));
 		node.setMemoryBlocks(initializeMemoryBlocks(nodeNumber));
 		return node;
 	}
@@ -70,9 +70,11 @@ public class SystemSimulatorUtils {
 		return result;
 	}
 
-	private Map<Integer, DirectoryEntry> initializeDirectoryEntries() {
+	private Map<Integer, DirectoryEntry> initializeDirectoryEntries(int nodeNumber) {
 		Map<Integer, DirectoryEntry> entries = new HashMap<>();
-		for (int i = 0; i < NUMBER_OF_WORDS_IN_MEMORY; i++) {
+		int startIndex = nodeNumber * NUMBER_OF_WORDS_IN_MEMORY;
+		int endIndex = startIndex + NUMBER_OF_WORDS_IN_MEMORY;
+		for (int i = startIndex; i < endIndex; i++) {
 			entries.put(i, initializeDirectoryEntry());
 		}
 		return entries;
@@ -149,7 +151,24 @@ public class SystemSimulatorUtils {
 				System.out.println();
 			}
 
+			int startIndex = i * NUMBER_OF_WORDS_IN_MEMORY;
+			int endIndex = startIndex + NUMBER_OF_WORDS_IN_MEMORY;
+			System.out.println("\tMemory\t\t\t\t\tDirectory");
+			Map<Integer, String> memoryBlocks = nodes.get(nodeNumber).getMemoryBlocks();
+			Map<Integer, DirectoryEntry> directoryEntries = nodes.get(nodeNumber).getDirectoryEntries();
+			for (int j = startIndex; j < endIndex; j++) {
+				System.out.println(j + "\t" + memoryBlocks.get(j) + "\t" + printDirectoryValues(directoryEntries.get(j).getValues()));
+			}
+
 		}
+	}
+
+	private String printDirectoryValues(Map<String, String> values) {
+		String result = "";
+		for (int i = 0; i < NUMBER_OF_NODES; i++) {
+			result += values.get(String.format("%2s", Integer.toBinaryString(i)).replace(' ', '0')) + " ";
+		}
+		return result;
 	}
 
 	private int printBoolean(boolean validBit) {
