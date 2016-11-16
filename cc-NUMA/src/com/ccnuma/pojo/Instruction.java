@@ -5,9 +5,9 @@ public class Instruction {
 	private String node;
 	private String cpu;
 	private String instruction;
+	private InstructionType type;
 
 	public Instruction() {
-
 	}
 
 	public Instruction(String node, String cpu, String instruction) {
@@ -15,6 +15,7 @@ public class Instruction {
 		this.node = node;
 		this.cpu = cpu;
 		this.instruction = instruction;
+		this.type = InstructionType.findValueOf(instruction);
 	}
 
 	public String getNode() {
@@ -39,5 +40,13 @@ public class Instruction {
 
 	public void setInstruction(String instruction) {
 		this.instruction = instruction;
+	}
+
+	public InstructionType getType() {
+		return type;
+	}
+
+	public void setType(InstructionType type) {
+		this.type = type;
 	}
 }
