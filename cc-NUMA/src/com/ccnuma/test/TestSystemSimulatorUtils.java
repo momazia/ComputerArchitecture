@@ -15,12 +15,12 @@ public class TestSystemSimulatorUtils {
 
 	@Test
 	public void testInitializeNodes() {
-		Map<String, Node> nodes = SystemSimulatorUtils.getInstance().initializeNodes();
+		Map<Integer, Node> nodes = SystemSimulatorUtils.getInstance().initializeNodes();
 		assertEquals(4, nodes.size());
-		assertTrue(nodes.keySet().contains("00"));
-		assertTrue(nodes.keySet().contains("01"));
-		assertTrue(nodes.keySet().contains("10"));
-		assertTrue(nodes.keySet().contains("11"));
+		assertTrue(nodes.keySet().contains(0));
+		assertTrue(nodes.keySet().contains(1));
+		assertTrue(nodes.keySet().contains(2));
+		assertTrue(nodes.keySet().contains(3));
 	}
 
 	@Test

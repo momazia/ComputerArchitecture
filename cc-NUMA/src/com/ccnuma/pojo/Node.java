@@ -5,7 +5,7 @@ import java.util.Map;
 public class Node {
 
 	private Map<String, CPU> cpus;
-	private Map<Integer, String> memoryBlocks;
+	private Map<Integer, Integer> memoryBlocks;
 	private Map<Integer, DirectoryEntry> directoryEntries;
 
 	public Map<String, CPU> getCpus() {
@@ -16,19 +16,19 @@ public class Node {
 		this.cpus = cpus;
 	}
 
-	public Map<Integer, String> getMemoryBlocks() {
-		return memoryBlocks;
-	}
-
-	public void setMemoryBlocks(Map<Integer, String> memoryBlocks) {
-		this.memoryBlocks = memoryBlocks;
-	}
-
 	public Map<Integer, DirectoryEntry> getDirectoryEntries() {
 		return directoryEntries;
 	}
 
 	public void setDirectoryEntries(Map<Integer, DirectoryEntry> directoryEntries) {
 		this.directoryEntries = directoryEntries;
+	}
+
+	public Map<Integer, Integer> getMemoryBlocks() {
+		return memoryBlocks;
+	}
+
+	public void setMemoryBlocks(Map<Integer, Integer> memoryBlocks) {
+		this.memoryBlocks = memoryBlocks;
 	}
 }

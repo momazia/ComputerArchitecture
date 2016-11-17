@@ -4,14 +4,23 @@ import java.util.Map;
 
 public class DirectoryEntry {
 
-	private Map<String, String> values;
+	private Map<Integer, Integer> values;
+	private DirectoryEntryState state;
 
-	public Map<String, String> getValues() {
+	public Map<Integer, Integer> getValues() {
 		return values;
 	}
 
-	public void setValues(Map<String, String> values) {
+	public void setValues(Map<Integer, Integer> values) {
 		this.values = values;
+	}
+
+	public DirectoryEntryState getState() {
+		return state;
+	}
+
+	public void setState(DirectoryEntryState state) {
+		this.state = state;
 	}
 
 }

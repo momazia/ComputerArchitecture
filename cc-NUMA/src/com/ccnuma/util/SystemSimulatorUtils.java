@@ -6,6 +6,8 @@ import java.util.Map;
 import com.ccnuma.pojo.CPU;
 import com.ccnuma.pojo.CacheEntry;
 import com.ccnuma.pojo.DirectoryEntry;
+import com.ccnuma.pojo.DirectoryEntryState;
+import com.ccnuma.pojo.Instruction;
 import com.ccnuma.pojo.NUMASystem;
 import com.ccnuma.pojo.Node;
 
@@ -44,10 +46,10 @@ public class SystemSimulatorUtils {
 		return system;
 	}
 
-	public Map<String, Node> initializeNodes() {
-		Map<String, Node> nodes = new HashMap<>();
+	public Map<Integer, Node> initializeNodes() {
+		Map<Integer, Node> nodes = new HashMap<>();
 		for (int i = 0; i < NUMBER_OF_NODES; i++) {
-			nodes.put(String.format("%2s", Integer.toBinaryString(i)).replace(' ', '0'), initializeNode(i));
+			nodes.put(i, initializeNode(i));
 		}
 		return nodes;
 	}
@@ -60,12 +62,12 @@ public class SystemSimulatorUtils {
 		return node;
 	}
 
-	public Map<Integer, String> initializeMemoryBlocks(int nodeNumber) {
-		Map<Integer, String> result = new HashMap<>();
+	public Map<Integer, Integer> initializeMemoryBlocks(int nodeNumber) {
+		Map<Integer, Integer> result = new HashMap<>();
 		int startIndex = nodeNumber * NUMBER_OF_WORDS_IN_MEMORY;
 		int endIndex = startIndex + NUMBER_OF_WORDS_IN_MEMORY;
 		for (int i = startIndex; i < endIndex; i++) {
-			result.put(i, String.format("%32s", Integer.toBinaryString(i + 5)).replace(' ', '0'));
+			result.put(i, i + 5);
 		}
 		return result;
 	}
@@ -82,11 +84,12 @@ public class SystemSimulatorUtils {
 
 	private DirectoryEntry initializeDirectoryEntry() {
 		DirectoryEntry entry = new DirectoryEntry();
-		Map<String, String> values = new HashMap<>();
+		Map<Integer, Integer> values = new HashMap<>();
 		for (int i = 0; i < NUMBER_OF_NODES; i++) {
-			values.put(String.format("%2s", Integer.toBinaryString(i)).replace(' ', '0'), initializeValueWithZeros(2));
+			values.put(i, 0);
 		}
 		entry.setValues(values);
+		entry.setState(DirectoryEntryState.UN_CACHED);
 		return entry;
 	}
 
@@ -109,10 +112,10 @@ public class SystemSimulatorUtils {
 		return entries;
 	}
 
-	private Map<String, String> initializeRegisters() {
-		Map<String, String> registers = new HashMap<>();
+	private Map<Integer, Integer> initializeRegisters() {
+		Map<Integer, Integer> registers = new HashMap<>();
 		for (int i = 1; i <= NUMBER_OF_REGISTERS; i++) {
-			registers.put(Integer.toString(i), initializeValueWithZeros(WORD_SIZE));
+			registers.put(i, 0);
 		}
 		return registers;
 	}
@@ -126,22 +129,26 @@ public class SystemSimulatorUtils {
 	}
 
 	public void print(NUMASystem system) {
-		Map<String, Node> nodes = system.getNodes();
 
+		Map<Integer, Node> nodes = system.getNodes();
+		// Looping through the nodes
 		for (int i = 0; i < NUMBER_OF_NODES; i++) {
-			String nodeNumber = String.format("%2s", Integer.toBinaryString(i)).replace(' ', '0');
+			String nodeNumber = format(i, 2);
 			System.out.println("\t------------------------- Node (" + nodeNumber + ") --------------------------");
 
-			for (String cpuNumber : nodes.get(nodeNumber).getCpus().keySet()) {
+			// Going through the CPUs
+			for (String cpuNumber : nodes.get(i).getCpus().keySet()) {
 
-				CPU cpu = nodes.get(nodeNumber).getCpus().get(cpuNumber);
+				CPU cpu = nodes.get(i).getCpus().get(cpuNumber);
 				System.out.println("CPU " + cpuNumber + ":");
 
-				System.out.println("\tRegistery:");
-				for (String registeryNumber : cpu.getRegisters().keySet()) {
-					System.out.println("\t\tS" + registeryNumber + ": " + cpu.getRegisters().get(registeryNumber));
+				// Printing the registers
+				System.out.println("\tRegister:");
+				for (Integer registerNumber : cpu.getRegisters().keySet()) {
+					System.out.println("\t\tS" + registerNumber + ": " + format(cpu.getRegisters().get(registerNumber)));
 				}
 
+				// Printing the cache content
 				System.out.println("\tCache " + cpuNumber + ":");
 				for (int j = 0; j < NUMBER_OF_CACHE_ROWS; j++) {
 					CacheEntry cacheEntry = cpu.getCacheEntries().get(j);
@@ -151,27 +158,40 @@ public class SystemSimulatorUtils {
 				System.out.println();
 			}
 
+			// Printing memory and directory contents
 			int startIndex = i * NUMBER_OF_WORDS_IN_MEMORY;
 			int endIndex = startIndex + NUMBER_OF_WORDS_IN_MEMORY;
 			System.out.println("\tMemory\t\t\t\t\tDirectory");
-			Map<Integer, String> memoryBlocks = nodes.get(nodeNumber).getMemoryBlocks();
-			Map<Integer, DirectoryEntry> directoryEntries = nodes.get(nodeNumber).getDirectoryEntries();
+			Map<Integer, Integer> memoryBlocks = nodes.get(i).getMemoryBlocks();
+			Map<Integer, DirectoryEntry> directoryEntries = nodes.get(i).getDirectoryEntries();
 			for (int j = startIndex; j < endIndex; j++) {
-				System.out.println(j + "\t" + memoryBlocks.get(j) + "\t" + printDirectoryValues(directoryEntries.get(j).getValues()));
+				System.out.println(j + "\t" + format(memoryBlocks.get(j)) + "\t" + printDirectoryValues(directoryEntries.get(j)));
 			}
 
 		}
 	}
 
-	private String printDirectoryValues(Map<String, String> values) {
-		String result = "";
+	private String format(Integer value) {
+		return format(value, WORD_SIZE);
+	}
+
+	private String format(int value, int padding) {
+		return String.format("%" + padding + "s", Integer.toBinaryString(value)).replace(' ', '0');
+	}
+
+	private String printDirectoryValues(DirectoryEntry directoryEntry) {
+		String result = format(directoryEntry.getState().getValue(), 2) + " ";
 		for (int i = 0; i < NUMBER_OF_NODES; i++) {
-			result += values.get(String.format("%2s", Integer.toBinaryString(i)).replace(' ', '0')) + " ";
+			result += directoryEntry.getValues().get(i) + " ";
 		}
 		return result;
 	}
 
 	private int printBoolean(boolean validBit) {
 		return validBit ? 1 : 0;
+	}
+
+	public void read(NUMASystem system, String cpuNumber, String nodeNumber, String instruction) {
+
 	}
 }

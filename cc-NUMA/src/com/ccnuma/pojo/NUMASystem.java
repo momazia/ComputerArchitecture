@@ -4,13 +4,14 @@ import java.util.Map;
 
 public class NUMASystem {
 
-	private Map<String, Node> nodes;
+	private Map<Integer, Node> nodes;
 
-	public Map<String, Node> getNodes() {
+	public Map<Integer, Node> getNodes() {
 		return nodes;
 	}
 
-	public void setNodes(Map<String, Node> nodes) {
+	public void setNodes(Map<Integer, Node> nodes) {
 		this.nodes = nodes;
 	}
+
 }
