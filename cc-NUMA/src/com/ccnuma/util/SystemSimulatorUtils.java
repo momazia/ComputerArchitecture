@@ -151,9 +151,11 @@ public class SystemSimulatorUtils {
 
 				// Printing the cache content
 				System.out.println("\tCache " + cpuNumber + ":");
+				System.out.println("\t\ti v Tag  Value");
+
 				for (int j = 0; j < NUMBER_OF_CACHE_ROWS; j++) {
 					CacheEntry cacheEntry = cpu.getCacheEntries().get(j);
-					System.out.println("\t\t" + j + " " + printBoolean(cacheEntry.isValidBit()) + " " + cacheEntry.getTagField() + " " + cacheEntry.getValue());
+					System.out.println("\t\t" + j + " " + printBoolean(cacheEntry.isValidBit()) + " " + format(cacheEntry.getTagField(), 4) + " " + format(cacheEntry.getValue()));
 				}
 				System.out.println();
 			}
@@ -161,7 +163,7 @@ public class SystemSimulatorUtils {
 			// Printing memory and directory contents
 			int startIndex = i * NUMBER_OF_WORDS_IN_MEMORY;
 			int endIndex = startIndex + NUMBER_OF_WORDS_IN_MEMORY;
-			System.out.println("\tMemory\t\t\t\t\tDirectory");
+			System.out.println("i\tMemory\t\t\t\t\tDirectory");
 			Map<Integer, Integer> memoryBlocks = nodes.get(i).getMemoryBlocks();
 			Map<Integer, DirectoryEntry> directoryEntries = nodes.get(i).getDirectoryEntries();
 			for (int j = startIndex; j < endIndex; j++) {
@@ -175,7 +177,10 @@ public class SystemSimulatorUtils {
 		return format(value, WORD_SIZE);
 	}
 
-	private String format(int value, int padding) {
+	private String format(Integer value, int padding) {
+		if (value == null) {
+			return "";
+		}
 		return String.format("%" + padding + "s", Integer.toBinaryString(value)).replace(' ', '0');
 	}
 
@@ -203,39 +208,106 @@ public class SystemSimulatorUtils {
 		int otherCpuNumber = (~cpuNumber) & 1;
 		localCacheValue = searchLocalCache(system.getNodes().get(nodeNumber).getCpus().get(otherCpuNumber), instruction);
 		if (localCacheValue != null) {
-			// Loading the data into register
-			loadDataIntoRegister(system, nodeNumber, otherCpuNumber, instruction, localCacheValue);
+			// Loading the data coming from other cache into into both local
+			// cache and register
+			loadDataIntoCacheAndRegister(system, nodeNumber, cpuNumber, instruction, localCacheValue);
 			return 30;
 		}
 		// 3. Searching the home node's memory/directory
 		int memoryAddress = instruction.getOffset() >> 2;
-		int memoryValue = containsMostRecentCleanData(system, memoryAddress);
+		Integer memoryValue = containsMostRecentCleanData(system, memoryAddress);
+		if (memoryValue != null) {
+			// Meaning the data is clean and it is the most recent version, So
+			// we load it into local cache and register
+			loadDataIntoCacheAndRegister(system, nodeNumber, cpuNumber, instruction, memoryValue);
+			// Updating the directory state and node flag
+			updateDirectory(system, nodeNumber, memoryAddress, DirectoryEntryState.SHARED);
+			return 100;
+		}
 		return null;
 	}
 
-	private int containsMostRecentCleanData(NUMASystem system, int memoryAddress) {
-		// TODO: complete this method
-		return 0;
+	private void updateDirectory(NUMASystem system, int newNodeNumber, int memoryAddress, DirectoryEntryState state) {
+		for (Node node : system.getNodes().values()) {
+			// Finding the home directory
+			if (node.getDirectoryEntries().containsKey(memoryAddress)) {
+				node.getDirectoryEntries().get(memoryAddress).setState(state);
+				node.getDirectoryEntries().get(memoryAddress).getValues().put(newNodeNumber, 1);
+			}
+		}
+	}
+
+	private void storeDataIntoCache(NUMASystem system, int nodeNumber, int toCpu, Integer localCacheValue, LoadInstruction instruction) {
+		Integer cacheIndex = getCacheIndex(instruction);
+		Integer tagField = getTagField(instruction);
+		system.getNodes().get(nodeNumber).getCpus().get(toCpu).getCacheEntries().put(cacheIndex, new CacheEntry(true, tagField, localCacheValue));
+	}
+
+	private void loadDataIntoCacheAndRegister(NUMASystem system, int nodeNumber, int cpuNumber, LoadInstruction instruction, Integer memoryValue) {
+		Integer registerNumber = getRegisterNumber(instruction);
+		Integer cacheIndex = getCacheIndex(instruction);
+		Integer tagField = getTagField(instruction);
+		system.getNodes().get(nodeNumber).getCpus().get(cpuNumber).getRegisters().put(registerNumber, memoryValue);
+		system.getNodes().get(nodeNumber).getCpus().get(cpuNumber).getCacheEntries().put(cacheIndex, new CacheEntry(true, tagField, memoryValue));
+	}
+
+	private Integer containsMostRecentCleanData(NUMASystem system, int memoryAddress) {
+		for (Node node : system.getNodes().values()) {
+			if (node.getDirectoryEntries().containsKey(memoryAddress)) {
+				DirectoryEntryState state = node.getDirectoryEntries().get(memoryAddress).getState();
+				if (DirectoryEntryState.SHARED.equals(state) || DirectoryEntryState.UN_CACHED.equals(state)) {
+					// Returning the memory value
+					return node.getMemoryBlocks().get(memoryAddress);
+				} else if (DirectoryEntryState.DIRTY.equals(state)) {
+					return null;
+				}
+			}
+		}
+		return null;
 	}
 
 	private void loadDataIntoRegister(NUMASystem system, int nodeNumber, int cpuNumber, LoadInstruction instruction, Integer localCacheValue) {
-		Integer registerNumber = instruction.getRt() - RT_BASE_NUMBER;
+		Integer registerNumber = getRegisterNumber(instruction);
 		system.getNodes().get(nodeNumber).getCpus().get(cpuNumber).getRegisters().put(registerNumber, localCacheValue);
 	}
 
+	private Integer getRegisterNumber(LoadInstruction instruction) {
+		Integer registerNumber = instruction.getRt() - RT_BASE_NUMBER;
+		return registerNumber;
+	}
+
 	public Integer searchLocalCache(CPU cpu, LoadInstruction instruction) {
-		// Calculating the cache index using bitwise operation to get the most 2
-		// right bits.
-		int cacheIndex = instruction.getOffset() & 3;
+		int cacheIndex = getCacheIndex(instruction);
 		// Checking the valid bit
 		CacheEntry cacheEntry = cpu.getCacheEntries().get(cacheIndex);
 		if (cacheEntry.isValidBit() && cacheEntry.getTagField() != null) {
-			// Getting the 4 most left bits from the offset.
-			int tag = instruction.getOffset() & 60;
+			int tag = getTagField(instruction);
 			if (cacheEntry.getTagField().equals(tag)) {
 				return cacheEntry.getValue();
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Calculates the tag field based on the load instruction passed, by getting
+	 * the 4 most left bits from the offset.
+	 * 
+	 * @param instruction
+	 * @return
+	 */
+	private Integer getTagField(LoadInstruction instruction) {
+		return instruction.getOffset() >> 4;
+	}
+
+	/**
+	 * Calculates the cache index based on the load instruction given by getting
+	 * the most right two bits.
+	 * 
+	 * @param instruction
+	 * @return
+	 */
+	private int getCacheIndex(LoadInstruction instruction) {
+		return (instruction.getOffset() >> 2) & 3;
 	}
 }

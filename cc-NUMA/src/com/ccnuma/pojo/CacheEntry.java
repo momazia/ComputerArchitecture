@@ -3,8 +3,17 @@ package com.ccnuma.pojo;
 public class CacheEntry {
 
 	private boolean validBit = false;
-	private String tagField;
+	private Integer tagField;
 	private Integer value;
+
+	public CacheEntry(boolean validBit, Integer tagField, Integer value) {
+		this.validBit = validBit;
+		this.setTagField(tagField);
+		this.value = value;
+	}
+
+	public CacheEntry() {
+	}
 
 	public boolean isValidBit() {
 		return validBit;
@@ -14,20 +23,20 @@ public class CacheEntry {
 		this.validBit = validBit;
 	}
 
-	public String getTagField() {
-		return tagField;
-	}
-
-	public void setTagField(String tagField) {
-		this.tagField = tagField;
-	}
-
 	public Integer getValue() {
 		return value;
 	}
 
 	public void setValue(Integer value) {
 		this.value = value;
+	}
+
+	public Integer getTagField() {
+		return tagField;
+	}
+
+	public void setTagField(Integer tagField) {
+		this.tagField = tagField;
 	}
 
 }

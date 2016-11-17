@@ -55,7 +55,13 @@ public class TestSystemSimulatorUtils {
 	@Test
 	public void testRead() {
 		NUMASystem system = SystemSimulatorUtils.getInstance().initializeSimulator();
+		SystemSimulatorUtils.getInstance().print(system);
 		SystemSimulatorUtils.getInstance().read(system, 0, 0, new LoadInstruction("10001100000100010000000001101100"));
+		SystemSimulatorUtils.getInstance().print(system);
+		SystemSimulatorUtils.getInstance().read(system, 0, 1, new LoadInstruction("10001100000100100000000001101100"));
+		SystemSimulatorUtils.getInstance().print(system);
+		SystemSimulatorUtils.getInstance().read(system, 1, 0, new LoadInstruction("10001100000100010000000001101100"));
+		SystemSimulatorUtils.getInstance().print(system);
 	}
 
 }
