@@ -2,17 +2,17 @@ package com.ccnuma.pojo;
 
 public class Instruction {
 
-	private String node;
-	private String cpu;
+	private Integer node;
+	private Integer cpu;
 	private IInstruction instruction;
 
 	public Instruction() {
 	}
 
-	public Instruction(String node, String cpu, String instruction) {
+	public Instruction(Integer node, Integer cpu, String instruction) {
 		super();
-		this.node = node;
-		this.cpu = cpu;
+		this.setNode(node);
+		this.setCpu(cpu);
 		this.instruction = instuctionFactory(instruction);
 	}
 
@@ -26,28 +26,28 @@ public class Instruction {
 		return null;
 	}
 
-	public String getNode() {
-		return node;
-	}
-
-	public void setNode(String node) {
-		this.node = node;
-	}
-
-	public String getCpu() {
-		return cpu;
-	}
-
-	public void setCpu(String cpu) {
-		this.cpu = cpu;
-	}
-
 	public IInstruction getInstruction() {
 		return instruction;
 	}
 
 	public void setInstruction(IInstruction instruction) {
 		this.instruction = instruction;
+	}
+
+	public Integer getNode() {
+		return node;
+	}
+
+	public void setNode(Integer node) {
+		this.node = node;
+	}
+
+	public Integer getCpu() {
+		return cpu;
+	}
+
+	public void setCpu(Integer cpu) {
+		this.cpu = cpu;
 	}
 
 }

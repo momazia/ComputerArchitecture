@@ -2,28 +2,38 @@ package com.ccnuma.pojo;
 
 public class IInstruction {
 
-	private String destination;
-	private Integer target;
+	private Integer rs;
+	private Integer rt;
+	private Integer offset;
 
 	public IInstruction(String instruction) {
-		this.destination = instruction.substring(3, 4);
-		this.target = Integer.parseInt(instruction.substring(4), 16);
+		this.rs = Integer.parseInt(instruction.substring(6, 11), 2);
+		this.rt = Integer.parseInt(instruction.substring(11, 16), 2);
+		this.offset = Integer.parseInt(instruction.substring(16), 2);
 	}
 
-	public String getDestination() {
-		return destination;
+	public Integer getRs() {
+		return rs;
 	}
 
-	public void setDestination(String destination) {
-		this.destination = destination;
+	public void setRs(Integer rs) {
+		this.rs = rs;
 	}
 
-	public Integer getTarget() {
-		return target;
+	public Integer getRt() {
+		return rt;
 	}
 
-	public void setTarget(Integer target) {
-		this.target = target;
+	public void setRt(Integer rt) {
+		this.rt = rt;
+	}
+
+	public Integer getOffset() {
+		return offset;
+	}
+
+	public void setOffset(Integer offset) {
+		this.offset = offset;
 	}
 
 }

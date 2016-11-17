@@ -37,7 +37,7 @@ public class FileUtils {
 		List<String> lines = Files.readAllLines(Paths.get(FileUtils.IO_PATH + fileName));
 		List<Instruction> instructions = new ArrayList<>();
 		for (String line : lines) {
-			instructions.add(new Instruction(line.substring(0, 2), line.substring(2, 3), line.substring(5)));
+			instructions.add(new Instruction(Integer.parseInt(line.substring(0, 2), 2), Integer.parseInt(line.substring(2, 3), 2), line.substring(5)));
 		}
 		return instructions;
 	}

@@ -2,7 +2,7 @@ package com.ccnuma.pojo;
 
 public enum InstructionType {
 
-	LOAD("8"), STORE("A");
+	LOAD("100011"), STORE("101011");
 
 	private String value;
 
@@ -19,7 +19,7 @@ public enum InstructionType {
 			return null;
 		}
 		for (InstructionType type : InstructionType.values()) {
-			if (instruction.startsWith(type.getValue())) {
+			if (instruction.substring(0, 6).equals(type.getValue())) {
 				return type;
 			}
 		}
