@@ -191,7 +191,7 @@ public class SystemSimulatorUtils {
 		return validBit ? 1 : 0;
 	}
 
-	public int read(NUMASystem system, int nodeNumber, int cpuNumber, LoadInstruction instruction) {
+	public Integer read(NUMASystem system, int nodeNumber, int cpuNumber, LoadInstruction instruction) {
 		// 1. Searching local cache
 		Integer localCacheValue = searchLocalCache(system.getNodes().get(nodeNumber).getCpus().get(cpuNumber), instruction);
 		if (localCacheValue != null) {
