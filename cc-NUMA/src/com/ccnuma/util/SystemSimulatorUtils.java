@@ -7,7 +7,6 @@ import com.ccnuma.pojo.CPU;
 import com.ccnuma.pojo.CacheEntry;
 import com.ccnuma.pojo.DirectoryEntry;
 import com.ccnuma.pojo.DirectoryEntryState;
-import com.ccnuma.pojo.Instruction;
 import com.ccnuma.pojo.NUMASystem;
 import com.ccnuma.pojo.Node;
 
