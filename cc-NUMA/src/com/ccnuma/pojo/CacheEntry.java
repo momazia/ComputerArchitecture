@@ -4,7 +4,7 @@ public class CacheEntry {
 
 	private boolean validBit = false;
 	private String tagField;
-	private String value;
+	private Integer value;
 
 	public boolean isValidBit() {
 		return validBit;
@@ -22,11 +22,12 @@ public class CacheEntry {
 		this.tagField = tagField;
 	}
 
-	public String getValue() {
+	public Integer getValue() {
 		return value;
 	}
 
-	public void setValue(String value) {
+	public void setValue(Integer value) {
 		this.value = value;
 	}
+
 }

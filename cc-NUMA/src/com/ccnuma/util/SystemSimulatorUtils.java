@@ -7,11 +7,13 @@ import com.ccnuma.pojo.CPU;
 import com.ccnuma.pojo.CacheEntry;
 import com.ccnuma.pojo.DirectoryEntry;
 import com.ccnuma.pojo.DirectoryEntryState;
+import com.ccnuma.pojo.LoadInstruction;
 import com.ccnuma.pojo.NUMASystem;
 import com.ccnuma.pojo.Node;
 
 public class SystemSimulatorUtils {
 
+	private static final int RT_BASE_NUMBER = 16;
 	private static final int WORD_SIZE = 32;
 	private static final int NUMBER_OF_WORDS_IN_MEMORY = 16;
 	private static final int NUMBER_OF_NODES = 4;
@@ -92,13 +94,13 @@ public class SystemSimulatorUtils {
 		return entry;
 	}
 
-	public Map<String, CPU> initializeCPUs() {
-		Map<String, CPU> cpus = new HashMap<>();
+	public Map<Integer, CPU> initializeCPUs() {
+		Map<Integer, CPU> cpus = new HashMap<>();
 		for (int i = 0; i < NUMBER_OF_CPUS; i++) {
 			CPU cpu = new CPU();
 			cpu.setRegisters(initializeRegisters());
 			cpu.setCacheEntries(initializeCacheEntries());
-			cpus.put(Integer.toString(i), cpu);
+			cpus.put(i, cpu);
 		}
 		return cpus;
 	}
@@ -136,7 +138,7 @@ public class SystemSimulatorUtils {
 			System.out.println("\t------------------------- Node (" + nodeNumber + ") --------------------------");
 
 			// Going through the CPUs
-			for (String cpuNumber : nodes.get(i).getCpus().keySet()) {
+			for (Integer cpuNumber : nodes.get(i).getCpus().keySet()) {
 
 				CPU cpu = nodes.get(i).getCpus().get(cpuNumber);
 				System.out.println("CPU " + cpuNumber + ":");
@@ -153,7 +155,6 @@ public class SystemSimulatorUtils {
 					CacheEntry cacheEntry = cpu.getCacheEntries().get(j);
 					System.out.println("\t\t" + j + " " + printBoolean(cacheEntry.isValidBit()) + " " + cacheEntry.getTagField() + " " + cacheEntry.getValue());
 				}
-
 				System.out.println();
 			}
 
@@ -166,7 +167,7 @@ public class SystemSimulatorUtils {
 			for (int j = startIndex; j < endIndex; j++) {
 				System.out.println(j + "\t" + format(memoryBlocks.get(j)) + "\t" + printDirectoryValues(directoryEntries.get(j)));
 			}
-
+			System.out.println();
 		}
 	}
 
@@ -190,7 +191,51 @@ public class SystemSimulatorUtils {
 		return validBit ? 1 : 0;
 	}
 
-	public void read(NUMASystem system, String cpuNumber, String nodeNumber, String instruction) {
+	public int read(NUMASystem system, int nodeNumber, int cpuNumber, LoadInstruction instruction) {
+		// 1. Searching local cache
+		Integer localCacheValue = searchLocalCache(system.getNodes().get(nodeNumber).getCpus().get(cpuNumber), instruction);
+		if (localCacheValue != null) {
+			// Loading the data into register
+			loadDataIntoRegister(system, nodeNumber, cpuNumber, instruction, localCacheValue);
+			return 1;
+		}
+		// 2. Searching other caches in the local node
+		int otherCpuNumber = (~cpuNumber) & 1;
+		localCacheValue = searchLocalCache(system.getNodes().get(nodeNumber).getCpus().get(otherCpuNumber), instruction);
+		if (localCacheValue != null) {
+			// Loading the data into register
+			loadDataIntoRegister(system, nodeNumber, otherCpuNumber, instruction, localCacheValue);
+			return 30;
+		}
+		// 3. Searching the home node's memory/directory
+		int memoryAddress = instruction.getOffset() >> 2;
+		int memoryValue = containsMostRecentCleanData(system, memoryAddress);
+		return null;
+	}
 
+	private int containsMostRecentCleanData(NUMASystem system, int memoryAddress) {
+		// TODO: complete this method
+		return 0;
+	}
+
+	private void loadDataIntoRegister(NUMASystem system, int nodeNumber, int cpuNumber, LoadInstruction instruction, Integer localCacheValue) {
+		Integer registerNumber = instruction.getRt() - RT_BASE_NUMBER;
+		system.getNodes().get(nodeNumber).getCpus().get(cpuNumber).getRegisters().put(registerNumber, localCacheValue);
+	}
+
+	public Integer searchLocalCache(CPU cpu, LoadInstruction instruction) {
+		// Calculating the cache index using bitwise operation to get the most 2
+		// right bits.
+		int cacheIndex = instruction.getOffset() & 3;
+		// Checking the valid bit
+		CacheEntry cacheEntry = cpu.getCacheEntries().get(cacheIndex);
+		if (cacheEntry.isValidBit() && cacheEntry.getTagField() != null) {
+			// Getting the 4 most left bits from the offset.
+			int tag = instruction.getOffset() & 60;
+			if (cacheEntry.getTagField().equals(tag)) {
+				return cacheEntry.getValue();
+			}
+		}
+		return null;
 	}
 }
