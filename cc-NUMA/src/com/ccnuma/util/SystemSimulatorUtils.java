@@ -1,6 +1,8 @@
 package com.ccnuma.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.ccnuma.pojo.CPU;
@@ -214,7 +216,7 @@ public class SystemSimulatorUtils {
 			return 30;
 		}
 		// 3. Searching the home node's memory/directory
-		int memoryAddress = instruction.getOffset() >> 2;
+		int memoryAddress = getMemoryAddress(instruction);
 		Integer memoryValue = containsMostRecentCleanData(system, memoryAddress);
 		if (memoryValue != null) {
 			// Meaning the data is clean and it is the most recent version, So
@@ -224,7 +226,61 @@ public class SystemSimulatorUtils {
 			updateDirectory(system, nodeNumber, memoryAddress, DirectoryEntryState.SHARED);
 			return 100;
 		}
+		// 4. The data is dirty, looking up for the latest data in the dirty
+		// node
+		List<Integer> dirtyNodeNumbers = findDirtyNodes(system, memoryAddress);
+		Integer latestValue = findLatestValue(system, instruction, dirtyNodeNumbers);
+		if (storeDataIntoMemory(system, memoryAddress, latestValue)) {
+			// Storage was successful, updating directory.
+			updateDirectory(system, nodeNumber, memoryAddress, DirectoryEntryState.SHARED);
+			// Reading the data from memory into cache and register
+			loadDataIntoCacheAndRegister(system, nodeNumber, cpuNumber, instruction, latestValue);
+			return 130;
+		}
 		return null;
+	}
+
+	private boolean storeDataIntoMemory(NUMASystem system, int memoryAddress, Integer value) {
+		for (Node node : system.getNodes().values()) {
+			// Finding the home directory
+			if (node.getMemoryBlocks().containsKey(memoryAddress)) {
+				node.getMemoryBlocks().put(memoryAddress, value);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private Integer findLatestValue(NUMASystem system, LoadInstruction instruction, List<Integer> dirtyNodeNumbers) {
+		Integer localCacheValue;
+		for (Integer dirtyNodeNumber : dirtyNodeNumbers) {
+			// Looking at all cache values
+			for (int i = 0; i < NUMBER_OF_CPUS; i++) {
+				localCacheValue = searchLocalCache(system.getNodes().get(dirtyNodeNumber).getCpus().get(i), instruction);
+				if (localCacheValue != null) {
+					// Means we found the latest value
+					return localCacheValue;
+				}
+			}
+		}
+		return null;
+	}
+
+	private List<Integer> findDirtyNodes(NUMASystem system, int memoryAddress) {
+		List<Integer> result = new ArrayList<>();
+		for (Node node : system.getNodes().values()) {
+			// Finding the home directory
+			if (node.getDirectoryEntries().containsKey(memoryAddress)) {
+				Map<Integer, Integer> nodeFlags = node.getDirectoryEntries().get(memoryAddress).getValues();
+				for (Integer nodeNumber : nodeFlags.keySet()) {
+					if (nodeFlags.get(nodeNumber) == 1) {
+						// Means it is a ditry node
+						result.add(nodeNumber);
+					}
+				}
+			}
+		}
+		return result;
 	}
 
 	private void updateDirectory(NUMASystem system, int newNodeNumber, int memoryAddress, DirectoryEntryState state) {
@@ -289,6 +345,10 @@ public class SystemSimulatorUtils {
 		return null;
 	}
 
+	private int getMemoryAddress(LoadInstruction instruction) {
+		return instruction.getOffset() >> 2;
+	}
+
 	/**
 	 * Calculates the tag field based on the load instruction passed, by getting
 	 * the 4 most left bits from the offset.
@@ -308,6 +368,6 @@ public class SystemSimulatorUtils {
 	 * @return
 	 */
 	private int getCacheIndex(LoadInstruction instruction) {
-		return (instruction.getOffset() >> 2) & 3;
+		return getMemoryAddress(instruction) & 3;
 	}
 }
