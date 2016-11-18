@@ -10,6 +10,7 @@ import com.ccnuma.pojo.CPU;
 import com.ccnuma.pojo.LoadInstruction;
 import com.ccnuma.pojo.NUMASystem;
 import com.ccnuma.pojo.Node;
+import com.ccnuma.pojo.StoreInstruction;
 import com.ccnuma.util.SystemSimulatorUtils;
 
 public class TestSystemSimulatorUtils {
@@ -55,12 +56,20 @@ public class TestSystemSimulatorUtils {
 	@Test
 	public void testRead() {
 		NUMASystem system = SystemSimulatorUtils.getInstance().initializeSimulator();
-		SystemSimulatorUtils.getInstance().print(system);
 		SystemSimulatorUtils.getInstance().read(system, 0, 0, new LoadInstruction("10001100000100010000000001101100"));
 		SystemSimulatorUtils.getInstance().print(system);
 		SystemSimulatorUtils.getInstance().read(system, 0, 1, new LoadInstruction("10001100000100100000000001101100"));
 		SystemSimulatorUtils.getInstance().print(system);
 		SystemSimulatorUtils.getInstance().read(system, 1, 0, new LoadInstruction("10001100000100010000000001101100"));
+		SystemSimulatorUtils.getInstance().print(system);
+	}
+	
+	@Test
+	public void testWrite() {
+		NUMASystem system = SystemSimulatorUtils.getInstance().initializeSimulator();
+		SystemSimulatorUtils.getInstance().read(system, 0, 0, new LoadInstruction("10001100000100010000000001101100"));
+		SystemSimulatorUtils.getInstance().read(system, 0, 1, new LoadInstruction("10001100000100100000000001101100"));
+		SystemSimulatorUtils.getInstance().write(system, 0, 0, new StoreInstruction("10101100000100010000000001001000"));
 		SystemSimulatorUtils.getInstance().print(system);
 	}
 
