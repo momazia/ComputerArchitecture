@@ -182,7 +182,7 @@ public class SystemSimulatorUtils {
 
 	private String format(Integer value, int padding) {
 		if (value == null) {
-			return "";
+			value = 0;
 		}
 		return String.format("%" + padding + "s", Integer.toBinaryString(value)).replace(' ', '0');
 	}
