@@ -1,6 +1,6 @@
 package com.ccnuma.pojo;
 
-public class IInstruction {
+public abstract class IInstruction {
 
 	private Integer rs;
 	private Integer rt;
@@ -11,6 +11,8 @@ public class IInstruction {
 		this.rt = Integer.parseInt(instruction.substring(11, 16), 2);
 		this.offset = Integer.parseInt(instruction.substring(16), 2);
 	}
+
+	public abstract Integer execute(NUMASystem system, Integer nodeNumber, Integer cpuNumber);
 
 	public Integer getRs() {
 		return rs;

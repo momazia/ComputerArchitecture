@@ -10,10 +10,9 @@ import com.ccnuma.pojo.CacheEntry;
 import com.ccnuma.pojo.DirectoryEntry;
 import com.ccnuma.pojo.DirectoryEntryState;
 import com.ccnuma.pojo.IInstruction;
-import com.ccnuma.pojo.LoadInstruction;
+import com.ccnuma.pojo.Instruction;
 import com.ccnuma.pojo.NUMASystem;
 import com.ccnuma.pojo.Node;
-import com.ccnuma.pojo.StoreInstruction;
 
 public class SystemSimulatorUtils {
 
@@ -200,7 +199,7 @@ public class SystemSimulatorUtils {
 		return validBit ? 1 : 0;
 	}
 
-	public Integer write(NUMASystem system, int nodeNumber, int cpuNumber, StoreInstruction instruction) {
+	public Integer write(NUMASystem system, int nodeNumber, int cpuNumber, IInstruction instruction) {
 		// 1. Search local cache
 		Integer localCacheValue = searchLocalCache(system.getNodes().get(nodeNumber).getCpus().get(cpuNumber), instruction);
 		int memoryAddress = getMemoryAddress(instruction);
@@ -223,12 +222,12 @@ public class SystemSimulatorUtils {
 		return 100;
 	}
 
-	private void invalidateCaches(NUMASystem system, StoreInstruction instruction, int memoryAddress) {
+	private void invalidateCaches(NUMASystem system, IInstruction instruction, int memoryAddress) {
 		List<Integer> sharedNodeNumbers = findSharedNodesFromDirectory(system, memoryAddress);
 		invalidateCaches(system, sharedNodeNumbers, instruction);
 	}
 
-	private void updateMemoryAndDirectory(NUMASystem system, int memoryAddress, Integer value, StoreInstruction instruction) {
+	private void updateMemoryAndDirectory(NUMASystem system, int memoryAddress, Integer value, IInstruction instruction) {
 		for (Node node : system.getNodes().values()) {
 			if (node.getMemoryBlocks().containsKey(memoryAddress)) {
 				// Updating the value of the memory
@@ -253,12 +252,12 @@ public class SystemSimulatorUtils {
 		}
 	}
 
-	private Integer getDataFromRegister(NUMASystem system, int nodeNumber, int cpuNumber, StoreInstruction instruction) {
+	private Integer getDataFromRegister(NUMASystem system, int nodeNumber, int cpuNumber, IInstruction instruction) {
 		Integer registerNumber = getRegisterNumber(instruction);
 		return system.getNodes().get(nodeNumber).getCpus().get(cpuNumber).getRegisters().get(registerNumber);
 	}
 
-	private void invalidateCaches(NUMASystem system, List<Integer> sharedNodeNumbers, StoreInstruction instruction) {
+	private void invalidateCaches(NUMASystem system, List<Integer> sharedNodeNumbers, IInstruction instruction) {
 		int cacheIndex = getCacheIndex(instruction);
 		Integer tagField = getTagField(instruction);
 		for (Integer sharedNodeNumber : sharedNodeNumbers) {
@@ -282,7 +281,7 @@ public class SystemSimulatorUtils {
 		return false;
 	}
 
-	public Integer read(NUMASystem system, int nodeNumber, int cpuNumber, LoadInstruction instruction) {
+	public Integer read(NUMASystem system, int nodeNumber, int cpuNumber, IInstruction instruction) {
 		// 1. Searching local cache
 		Integer localCacheValue = searchLocalCache(system.getNodes().get(nodeNumber).getCpus().get(cpuNumber), instruction);
 		if (localCacheValue != null) {
@@ -333,7 +332,7 @@ public class SystemSimulatorUtils {
 		return false;
 	}
 
-	private Integer findLatestValue(NUMASystem system, LoadInstruction instruction, List<Integer> dirtyNodeNumbers) {
+	private Integer findLatestValue(NUMASystem system, IInstruction instruction, List<Integer> dirtyNodeNumbers) {
 		Integer localCacheValue;
 		for (Integer dirtyNodeNumber : dirtyNodeNumbers) {
 			// Looking at all cache values
@@ -380,7 +379,7 @@ public class SystemSimulatorUtils {
 		system.getNodes().get(nodeNumber).getCpus().get(cpuNumber).getCacheEntries().put(cacheIndex, new CacheEntry(true, tagField, value));
 	}
 
-	private void loadDataIntoCacheAndRegister(NUMASystem system, int nodeNumber, int cpuNumber, LoadInstruction instruction, Integer memoryValue) {
+	private void loadDataIntoCacheAndRegister(NUMASystem system, int nodeNumber, int cpuNumber, IInstruction instruction, Integer memoryValue) {
 		Integer registerNumber = getRegisterNumber(instruction);
 		Integer cacheIndex = getCacheIndex(instruction);
 		Integer tagField = getTagField(instruction);
@@ -403,7 +402,7 @@ public class SystemSimulatorUtils {
 		return null;
 	}
 
-	private void loadDataIntoRegister(NUMASystem system, int nodeNumber, int cpuNumber, LoadInstruction instruction, Integer localCacheValue) {
+	private void loadDataIntoRegister(NUMASystem system, int nodeNumber, int cpuNumber, IInstruction instruction, Integer localCacheValue) {
 		Integer registerNumber = getRegisterNumber(instruction);
 		system.getNodes().get(nodeNumber).getCpus().get(cpuNumber).getRegisters().put(registerNumber, localCacheValue);
 	}
@@ -455,6 +454,10 @@ public class SystemSimulatorUtils {
 	 */
 	private int getCacheIndex(IInstruction instruction) {
 		return getMemoryAddress(instruction) & 3;
+	}
+
+	public void print(Instruction instruction, Integer accessCost) {
+		System.out.println(instruction.getRaw() + " | Access Cost: " + accessCost);
 	}
 
 }

@@ -4,7 +4,8 @@ public class Instruction {
 
 	private Integer node;
 	private Integer cpu;
-	private IInstruction instruction;
+	private IInstruction iInstruction;
+	private String raw;
 
 	public Instruction() {
 	}
@@ -13,10 +14,11 @@ public class Instruction {
 		super();
 		this.setNode(node);
 		this.setCpu(cpu);
-		this.instruction = instuctionFactory(instruction);
+		this.iInstruction = instructionFactory(instruction);
+		this.raw = instruction;
 	}
 
-	private IInstruction instuctionFactory(String instruction) {
+	private IInstruction instructionFactory(String instruction) {
 		switch (InstructionType.findValueOf(instruction)) {
 		case LOAD:
 			return new LoadInstruction(instruction);
@@ -26,12 +28,12 @@ public class Instruction {
 		return null;
 	}
 
-	public IInstruction getInstruction() {
-		return instruction;
+	public IInstruction getIInstruction() {
+		return iInstruction;
 	}
 
-	public void setInstruction(IInstruction instruction) {
-		this.instruction = instruction;
+	public void setIInstruction(IInstruction instruction) {
+		this.iInstruction = instruction;
 	}
 
 	public Integer getNode() {
@@ -48,6 +50,10 @@ public class Instruction {
 
 	public void setCpu(Integer cpu) {
 		this.cpu = cpu;
+	}
+
+	public String getRaw() {
+		return this.raw;
 	}
 
 }

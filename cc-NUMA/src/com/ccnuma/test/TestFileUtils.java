@@ -20,17 +20,17 @@ public class TestFileUtils {
 			List<Instruction> instructions = FileUtils.getInstance().readInstructionFile("test.txt");
 			assertEquals(Integer.valueOf(0), instructions.get(0).getNode());
 			assertEquals(Integer.valueOf(0), instructions.get(0).getCpu());
-			assertEquals(Integer.valueOf(108), instructions.get(0).getInstruction().getOffset());
-			assertEquals(Integer.valueOf(0), instructions.get(0).getInstruction().getRs());
-			assertEquals(Integer.valueOf(17), instructions.get(0).getInstruction().getRt());
-			assertTrue(instructions.get(0).getInstruction() instanceof LoadInstruction);
+			assertEquals(Integer.valueOf(108), instructions.get(0).getIInstruction().getOffset());
+			assertEquals(Integer.valueOf(0), instructions.get(0).getIInstruction().getRs());
+			assertEquals(Integer.valueOf(17), instructions.get(0).getIInstruction().getRt());
+			assertTrue(instructions.get(0).getIInstruction() instanceof LoadInstruction);
 
 			assertEquals(Integer.valueOf(2), instructions.get(1).getNode());
 			assertEquals(Integer.valueOf(1), instructions.get(1).getCpu());
-			assertEquals(Integer.valueOf(72), instructions.get(1).getInstruction().getOffset());
-			assertEquals(Integer.valueOf(0), instructions.get(1).getInstruction().getRs());
-			assertEquals(Integer.valueOf(18), instructions.get(1).getInstruction().getRt());
-			assertTrue(instructions.get(1).getInstruction() instanceof StoreInstruction);
+			assertEquals(Integer.valueOf(72), instructions.get(1).getIInstruction().getOffset());
+			assertEquals(Integer.valueOf(0), instructions.get(1).getIInstruction().getRs());
+			assertEquals(Integer.valueOf(18), instructions.get(1).getIInstruction().getRt());
+			assertTrue(instructions.get(1).getIInstruction() instanceof StoreInstruction);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail(e.getMessage());
