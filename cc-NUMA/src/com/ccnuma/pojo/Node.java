@@ -2,6 +2,12 @@ package com.ccnuma.pojo;
 
 import java.util.Map;
 
+/**
+ * A POJO to represent each node in the system. It contains a set of CPUs, memory blocks and directory entries.
+ * 
+ * @author Mahdi Ziaee
+ *
+ */
 public class Node {
 
 	private Map<Integer, CPU> cpus;

@@ -8,6 +8,12 @@ import java.util.List;
 
 import com.ccnuma.pojo.Instruction;
 
+/**
+ * A utility class which takes care of all the file related logics.
+ * 
+ * @author Mahdi Ziaee
+ *
+ */
 public class FileUtils {
 
 	private static final String IO_PATH = "../cc-NUMA/io/";
@@ -33,6 +39,13 @@ public class FileUtils {
 		return instance;
 	}
 
+	/**
+	 * Reads the content of the fileName given and constructs a list of instructions representing the binary instructions in the file.
+	 * 
+	 * @param fileName
+	 * @return
+	 * @throws IOException
+	 */
 	public List<Instruction> readInstructionFile(String fileName) throws IOException {
 		List<String> lines = Files.readAllLines(Paths.get(FileUtils.IO_PATH + fileName));
 		List<Instruction> instructions = new ArrayList<>();

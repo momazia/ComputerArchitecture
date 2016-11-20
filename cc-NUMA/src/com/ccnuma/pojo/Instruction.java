@@ -1,5 +1,11 @@
 package com.ccnuma.pojo;
 
+/**
+ * A POJO to represent the raw / actual input of the simulator.
+ * 
+ * @author Mahdi Ziaee
+ *
+ */
 public class Instruction {
 
 	private Integer node;
@@ -10,6 +16,13 @@ public class Instruction {
 	public Instruction() {
 	}
 
+	/**
+	 * Sets the properties of this class and uses the factory to instantiate proper instruction type.
+	 * 
+	 * @param node
+	 * @param cpu
+	 * @param instruction
+	 */
 	public Instruction(Integer node, Integer cpu, String instruction) {
 		super();
 		this.setNode(node);
@@ -18,6 +31,12 @@ public class Instruction {
 		this.raw = instruction;
 	}
 
+	/**
+	 * A factory to instantiate a proper I-Instruction type based on the first 6 bits.
+	 * 
+	 * @param instruction
+	 * @return
+	 */
 	private IInstruction instructionFactory(String instruction) {
 		switch (InstructionType.findValueOf(instruction)) {
 		case LOAD:

@@ -2,6 +2,12 @@ package com.ccnuma.pojo;
 
 import java.util.Map;
 
+/**
+ * A POJO to hold the data related to a CPU, like registers and the cache entries.
+ * 
+ * @author Mahdi Ziaee
+ *
+ */
 public class CPU {
 
 	private Map<Integer, Integer> registers;

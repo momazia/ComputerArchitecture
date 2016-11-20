@@ -1,5 +1,11 @@
 package com.ccnuma.pojo;
 
+/**
+ * An enumeration to represent different instruction types.
+ * 
+ * @author Mahdi Ziaee
+ *
+ */
 public enum InstructionType {
 
 	LOAD("100011"), STORE("101011");
@@ -14,6 +20,12 @@ public enum InstructionType {
 		return this.value;
 	}
 
+	/**
+	 * Finds the type of the instruction passed based on the first 6 bits. If it does not match, it returns null.
+	 * 
+	 * @param instruction
+	 * @return
+	 */
 	public static InstructionType findValueOf(String instruction) {
 		if (instruction == null) {
 			return null;

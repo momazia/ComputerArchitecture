@@ -26,13 +26,6 @@ public class TestSystemSimulatorUtils {
 	}
 
 	@Test
-	public void testInitializeValueWithZeros() {
-		String register = SystemSimulatorUtils.getInstance().initializeValueWithZeros(32);
-		assertEquals(32, register.length());
-		assertTrue(register.startsWith("0000000000"));
-	}
-
-	@Test
 	public void testInitializeCPUs() {
 		Map<Integer, CPU> cpus = SystemSimulatorUtils.getInstance().initializeCPUs();
 		assertEquals(2, cpus.size());
@@ -63,7 +56,7 @@ public class TestSystemSimulatorUtils {
 		SystemSimulatorUtils.getInstance().read(system, 1, 0, new LoadInstruction("10001100000100010000000001101100"));
 		SystemSimulatorUtils.getInstance().print(system);
 	}
-	
+
 	@Test
 	public void testWrite() {
 		NUMASystem system = SystemSimulatorUtils.getInstance().initializeSimulator();

@@ -2,6 +2,12 @@ package com.ccnuma.pojo;
 
 import com.ccnuma.util.SystemSimulatorUtils;
 
+/**
+ * The class represent a store instruction. A store instruction writes data.
+ * 
+ * @author Mahdi Ziaee
+ *
+ */
 public class StoreInstruction extends IInstruction {
 
 	public StoreInstruction(String instruction) {
